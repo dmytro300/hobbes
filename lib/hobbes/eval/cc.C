@@ -559,9 +559,9 @@ void cc::dumpModule() {
   this->jit->dump();
 }
 
-cc::bytes cc::machineCodeForExpr(const std::string& expr) {
+void cc::machineCodeForExpr(const std::string& expr) {
   hlock _;
-  return this->jit->machineCodeForExpr(unsweetenExpression(readExpr(expr)));
+  this->jit->machineCodeForExpr(unsweetenExpression(readExpr(expr)));
 }
 
 template <typename K, typename T>

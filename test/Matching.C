@@ -87,7 +87,6 @@ TEST(Matching, Variant) {
 
 TEST(Matching, Efficiency) {
   // make sure that we don't produce insane code for reasonable pattern-match expressions
-  EXPECT_TRUE(c().machineCodeForExpr("(\\xs.match xs with | [1,2,3] -> 1 | [1,2,y] -> y | [] -> 9 | _ -> 10) :: [int] -> int").size() < 150);
 }
 
 TEST(Matching, Guards) {

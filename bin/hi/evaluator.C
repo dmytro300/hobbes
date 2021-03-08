@@ -214,11 +214,6 @@ void evaluator::printLLVMModule() {
   this->ctx.dumpModule();
 }
 
-void evaluator::printAssembly(const std::string& expr, void (*f)(void*,size_t)) {
-  hobbes::cc::bytes d = this->ctx.machineCodeForExpr(expr);
-  f(reinterpret_cast<void*>(&(*(d.begin()))), d.size());
-}
-
 void evaluator::perfTestExpr(const std::string& expr) {
   typedef void (*pvthunk)();
   pvthunk f = this->ctx.compileFn<void()>(readExpr("let x = (" + expr + ") in ()"));

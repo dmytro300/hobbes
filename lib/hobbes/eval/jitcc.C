@@ -33,28 +33,6 @@ namespace hobbes {
 bool isFileType(const MonoTypePtr&);
 
 #if LLVM_VERSION_MINOR >= 6 || LLVM_VERSION_MAJOR == 4 || LLVM_VERSION_MAJOR == 6 || LLVM_VERSION_MAJOR >= 8
-class jitmm : public llvm::SectionMemoryManager {
-public:
-  jitmm(jitcc* jit) : jit(jit) { }
-
-  // link symbols across modules :T
-  uint64_t getSymbolAddress(const std::string& n) override {
-    if (uint64_t laddr = reinterpret_cast<uint64_t>(this->jit->getSymbolAddress(n))) {
-      return laddr;
-    }
-    if (n.size() > 0 && n[0] == '_') {
-      uint64_t sv = reinterpret_cast<uint64_t>(this->jit->getSymbolAddress(n.substr(1)));
-      if (sv) return sv;
-    }
-    if (uint64_t baddr = llvm::SectionMemoryManager::getSymbolAddress(n)) {
-      return baddr;
-    } else {
-      throw std::runtime_error("Internal error, can't resolve symbol: " + n);
-    }
-  }
-private:
-  jitcc* jit;
-};
 #endif
 
 jitcc::jitcc(const TEnvPtr& tenv) :
@@ -75,7 +53,7 @@ jitcc::jitcc(const TEnvPtr& tenv) :
 
 #if LLVM_VERSION_MINOR == 3 or LLVM_VERSION_MINOR == 5
   // for older LLVM versions, we create one module and an execution engine ahead of time
-  this->eengine = makeExecutionEngine(module(), 0);
+  this->eengine = makeExecutionEngine(module());
 
 #if LLVM_VERSION_MINOR >= 5
   this->mpm = new llvm::legacy::PassManager();
@@ -194,7 +172,7 @@ void* jitcc::getMachineCode(llvm::Function* f, llvm::JITEventListener* listener)
 
   // make a new execution engine out of this module (finalizing the module)
   std::string err;
-  llvm::ExecutionEngine* ee = makeExecutionEngine(this->currentModule, reinterpret_cast<llvm::SectionMemoryManager*>(new jitmm(this)));
+  llvm::ExecutionEngine* ee = makeExecutionEngine(this->currentModule);
 
   if (listener) {
     ee->RegisterJITEventListener(listener);
@@ -342,15 +320,11 @@ private:
 };
 #endif
 
-jitcc::bytes jitcc::machineCodeForExpr(const ExprPtr& e) {
+void jitcc::machineCodeForExpr(const ExprPtr& e) {
   std::string     fname = ".asm" + freshName();
-  LenWatch        lenwatch(fname);
   llvm::Function* af = compileFunction(fname, str::seq(), MonoTypes(), e);
-  void*           f  = getMachineCode(af, reinterpret_cast<llvm::JITEventListener*>(&lenwatch));
-  bytes           r  = bytes(reinterpret_cast<uint8_t*>(f), reinterpret_cast<uint8_t*>(f) + lenwatch.size());
-
+  void*           f  = getMachineCode(af);
   releaseMachineCode(f);
-  return r;
 }
 
 bool jitcc::isDefined(const std::string& vn) const {

@@ -104,7 +104,7 @@ public:
 
   // get the machine code produced for a given expression
   typedef std::vector<uint8_t> bytes;
-  bytes machineCodeForExpr(const ExprPtr&);
+  void machineCodeForExpr(const ExprPtr&);
 
   // inline all global definitions within an expression
   ExprPtr inlineGlobals(const ExprPtr&);

@@ -380,7 +380,6 @@ void evalLine(char* x) {
       break;
     }
     case ShowASM: {
-      eval->printAssembly(line, &printASM);
       break;
     }
     case Typeof: {

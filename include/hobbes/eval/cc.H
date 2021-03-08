@@ -173,7 +173,7 @@ public:
 
   // get the x86 machine code for an expression (useful for debugging)
   typedef std::vector<unsigned char> bytes;
-  bytes machineCodeForExpr(const std::string& expr);
+  void machineCodeForExpr(const std::string& expr);
 
   // keep track of C++ classes so that we can perform upcasts where necessary
   template <typename T>

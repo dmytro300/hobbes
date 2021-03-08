@@ -502,12 +502,11 @@ inline llvm::Value* structOffset(llvm::IRBuilder<>* b, llvm::Value* p, unsigned 
 }
 
 #if LLVM_VERSION_MINOR >= 6 || LLVM_VERSION_MAJOR == 4 || LLVM_VERSION_MAJOR == 6 || LLVM_VERSION_MAJOR >= 8
-inline llvm::ExecutionEngine* makeExecutionEngine(llvm::Module* m, llvm::SectionMemoryManager* smm) {
+inline llvm::ExecutionEngine* makeExecutionEngine(llvm::Module* m) {
   std::string err;
   llvm::ExecutionEngine* ee =
     llvm::EngineBuilder(std::unique_ptr<llvm::Module>(m))
       .setErrorStr(&err)
-      .setMCJITMemoryManager(std::unique_ptr<llvm::SectionMemoryManager>(smm))
       .create();
 
   if (!ee) {
